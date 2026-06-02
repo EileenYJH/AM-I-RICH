@@ -1,0 +1,65 @@
+<h2>How should we build this?</h2>
+<p class="subtitle">3 approaches — pick the one that feels right. I'll explain the trade-offs below each.</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>React Native + Expo + Claude Vision AI ⭐ Recommended</h3>
+      <p>Build on your Windows PC. Screenshots are sent to Claude's Vision API to intelligently extract balances and transactions. Works for any bank layout — no custom logic per app.</p>
+      <div class="pros-cons" style="margin-top:10px;">
+        <div class="pros"><h4>Pros</h4><ul>
+          <li>No Mac needed — build on Windows</li>
+          <li>AI reads any bank app screenshot automatically</li>
+          <li>JavaScript — Claude can help you every step</li>
+          <li>Share Extension works out of the box</li>
+        </ul></div>
+        <div class="cons"><h4>Cons</h4><ul>
+          <li>Small cost per screenshot (Claude API)</li>
+          <li>Needs internet to parse screenshots</li>
+          <li>Needs Apple Developer account ($99/yr) to install on iPhone</li>
+        </ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Native SwiftUI + Apple Vision (On-device OCR)</h3>
+      <p>A fully native iPhone app built in Swift. Uses Apple's built-in OCR engine on-device to read text from screenshots. Free, fast, and works offline — but needs custom rules per bank.</p>
+      <div class="pros-cons" style="margin-top:10px;">
+        <div class="pros"><h4>Pros</h4><ul>
+          <li>100% free — no API costs</li>
+          <li>Works offline</li>
+          <li>Best iOS look & feel</li>
+        </ul></div>
+        <div class="cons"><h4>Cons</h4><ul>
+          <li>Requires a Mac + Xcode to build</li>
+          <li>Harder to code — Swift is less beginner-friendly</li>
+          <li>Need to manually write rules for each bank app layout</li>
+        </ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Flutter + Google ML Kit (On-device OCR)</h3>
+      <p>Cross-platform app using Flutter (runs on Android too). Uses Google ML Kit for free on-device text recognition.</p>
+      <div class="pros-cons" style="margin-top:10px;">
+        <div class="pros"><h4>Pros</h4><ul>
+          <li>Works on Android too if you ever want it</li>
+          <li>Free, offline OCR</li>
+          <li>Can develop on Windows</li>
+        </ul></div>
+        <div class="cons"><h4>Cons</h4><ul>
+          <li>Dart language — Claude is less fluent, harder to get help</li>
+          <li>Still needs custom logic per bank layout</li>
+          <li>Less polished iOS feel than native</li>
+        </ul></div>
+      </div>
+    </div>
+  </div>
+</div>

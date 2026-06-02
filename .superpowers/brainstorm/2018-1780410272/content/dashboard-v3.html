@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AM I RICH — All Cards Visible</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #E8EBF4;
+    color: #1A1C2E;
+    font-family: -apple-system, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+    min-height: 100vh;
+  }
+
+  .phone-wrap {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 40px 20px;
+    gap: 48px;
+    flex-wrap: wrap;
+  }
+
+  .phone {
+    width: 375px;
+    background: #F2F4FA;
+    border-radius: 44px;
+    border: 1.5px solid rgba(0,0,0,0.08);
+    overflow: hidden;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.06);
+    position: relative;
+  }
+  .phone-label {
+    text-align: center;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(0,0,0,0.35);
+    margin-bottom: 12px;
+    font-weight: 600;
+  }
+
+  .status-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 24px 4px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #1A1C2E;
+    background: #F2F4FA;
+  }
+
+  .screen {
+    padding: 0 0 72px;
+    background: #F2F4FA;
+  }
+
+  /* Header */
+  .app-header {
+    padding: 10px 18px 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .greeting { font-size: 12px; color: #8B90A7; font-weight: 400; }
+  .app-name { font-size: 20px; font-weight: 800; color: #1A1C2E; letter-spacing: -0.5px; margin-top: 1px; }
+  .avatar {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: linear-gradient(135deg, #6C63FF, #4ECDC4);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; color: #fff;
+  }
+
+  /* Net worth */
+  .networth-banner {
+    margin: 2px 14px 0;
+    background: linear-gradient(135deg, #1A1C2E 0%, #2D3054 100%);
+    border-radius: 18px;
+    padding: 16px 18px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(26,28,46,0.25);
+  }
+  .networth-glow {
+    position: absolute; top: -30px; right: -30px;
+    width: 120px; height: 120px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(108,99,255,0.35) 0%, transparent 70%);
+  }
+  .networth-label { font-size: 10px; color: rgba(255,255,255,0.45); letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600; }
+  .networth-amount { font-size: 30px; font-weight: 800; color: #fff; letter-spacing: -1px; margin: 4px 0 2px; }
+  .networth-sub { font-size: 11px; color: rgba(255,255,255,0.35); }
+  .networth-badge {
+    position: absolute; top: 16px; right: 16px;
+    background: rgba(78,205,164,0.18);
+    color: #4ECDA4; font-size: 11px; font-weight: 700;
+    padding: 4px 10px; border-radius: 20px;
+    border: 1px solid rgba(78,205,164,0.3);
+  }
+
+  /* Section title */
+  .section-title {
+    font-size: 10px;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: #8B90A7;
+    font-weight: 700;
+    padding: 12px 18px 6px;
+  }
+
+  /* 3-column account grid */
+  .accounts-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    padding: 0 14px;
+  }
+
+  .account-card {
+    border-radius: 14px;
+    padding: 11px 11px 13px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.15);
+  }
+  .account-card::after {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 45%;
+    background: linear-gradient(to bottom, rgba(255,255,255,0.14), transparent);
+    pointer-events: none;
+  }
+
+  .card-icon { font-size: 14px; margin-bottom: 8px; display: block; }
+  .card-bank { font-size: 10px; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; color: rgba(255,255,255,0.9); line-height: 1.2; }
+  .card-type { font-size: 9px; color: rgba(255,255,255,0.5); margin-top: 1px; }
+  .card-balance { font-size: 14px; font-weight: 800; color: #fff; margin-top: 10px; letter-spacing: -0.3px; line-height: 1; }
+  .card-currency { font-size: 9px; color: rgba(255,255,255,0.55); margin-top: 2px; }
+
+  /* Brand colors */
+  .c-mae      { background: linear-gradient(140deg, #F0A800, #C88000); }
+  .c-cimb     { background: linear-gradient(140deg, #D4002B, #960020); }
+  .c-pb       { background: linear-gradient(140deg, #0040A8, #002880); }
+  .c-tng      { background: linear-gradient(140deg, #0088E8, #005CB8); }
+  .c-grab     { background: linear-gradient(140deg, #00B352, #007A38); }
+  .c-boost    { background: linear-gradient(140deg, #FF5030, #C82800); }
+
+  /* 2-column savings grid */
+  .savings-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    padding: 0 14px;
+  }
+  .savings-card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 12px 13px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    position: relative;
+    overflow: hidden;
+  }
+  .savings-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 3px; border-radius: 14px 14px 0 0;
+  }
+  .s-asnb::before { background: linear-gradient(90deg, #006B3E, #00A060); }
+  .s-fd::before   { background: linear-gradient(90deg, #2D3561, #4A5490); }
+
+  .sav-bank { font-size: 10px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: #8B90A7; }
+  .sav-type { font-size: 9px; color: #B0B5C8; margin-top: 1px; }
+  .sav-balance { font-size: 17px; font-weight: 800; color: #1A1C2E; margin-top: 10px; letter-spacing: -0.3px; }
+  .sav-currency { font-size: 9px; color: #8B90A7; margin-top: 1px; }
+
+  /* Bottom nav */
+  .bottom-nav {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    background: rgba(242,244,250,0.97);
+    backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(0,0,0,0.06);
+    display: flex;
+    padding: 10px 0 18px;
+  }
+  .nav-item {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; gap: 3px;
+    font-size: 10px; color: #B0B5C8; font-weight: 600;
+  }
+  .nav-item.active { color: #6C63FF; }
+  .nav-dot { width: 4px; height: 4px; border-radius: 50%; background: #6C63FF; margin-top: 1px; }
+  .nav-icon { font-size: 19px; line-height: 1; }
+
+  /* ---- Spending & Monthly (same as v2) ---- */
+  .page-header { padding: 14px 18px 10px; }
+  .page-title { font-size: 26px; font-weight: 800; color: #1A1C2E; letter-spacing: -0.8px; }
+  .page-sub { font-size: 12px; color: #8B90A7; margin-top: 2px; }
+
+  .cat-row { display: flex; gap: 7px; padding: 0 14px 12px; overflow-x: auto; scrollbar-width: none; }
+  .cat-row::-webkit-scrollbar { display: none; }
+  .cat-pill {
+    padding: 5px 13px; border-radius: 20px; white-space: nowrap;
+    font-size: 11px; font-weight: 600;
+    background: #fff; color: #8B90A7;
+    border: 1px solid rgba(0,0,0,0.06);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04); flex-shrink: 0;
+  }
+  .cat-pill.active { background: #6C63FF; color: #fff; border-color: #6C63FF; }
+
+  .spend-list { background: #fff; border-radius: 18px; margin: 0 14px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+  .spend-item {
+    display: flex; align-items: center;
+    padding: 12px 14px;
+    border-bottom: 1px solid #F2F4FA; gap: 11px;
+  }
+  .spend-item:last-child { border-bottom: none; }
+  .spend-icon { width: 38px; height: 38px; border-radius: 11px; display: flex; align-items: center; justify-content: center; font-size: 17px; flex-shrink: 0; }
+  .spend-info { flex: 1; }
+  .spend-name { font-size: 13px; font-weight: 700; color: #1A1C2E; }
+  .spend-meta { font-size: 10px; color: #B0B5C8; margin-top: 2px; }
+  .spend-amount { font-size: 13px; font-weight: 800; color: #E8344A; }
+  .spend-amount.income { color: #1A9E6A; }
+
+  .summary-row { display: flex; gap: 8px; margin: 0 14px 10px; }
+  .summary-card { flex: 1; background: #fff; border-radius: 13px; padding: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+  .sum-label { font-size: 9px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: #B0B5C8; }
+  .sum-value { font-size: 16px; font-weight: 800; color: #1A1C2E; letter-spacing: -0.3px; margin-top: 5px; }
+  .sum-value.red { color: #E8344A; }
+  .sum-value.green { color: #1A9E6A; }
+
+  .chart-card { margin: 0 14px 10px; background: #fff; border-radius: 18px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+  .chart-label { font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #8B90A7; margin-bottom: 14px; }
+  .bar-chart { display: flex; align-items: flex-end; gap: 8px; height: 68px; }
+  .bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+  .bar { width: 100%; border-radius: 5px 5px 0 0; background: #EEF0FA; min-height: 4px; }
+  .bar.current { background: #6C63FF; }
+  .bar-label { font-size: 9px; color: #B0B5C8; font-weight: 600; }
+  .bar-label.active { color: #6C63FF; }
+
+  .cat-list { background: #fff; border-radius: 18px; margin: 0 14px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+  .cat-item { display: flex; align-items: center; padding: 12px 14px; border-bottom: 1px solid #F2F4FA; gap: 11px; }
+  .cat-item:last-child { border-bottom: none; }
+  .cat-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+  .cat-info { flex: 1; }
+  .cat-name { font-size: 12px; font-weight: 700; color: #1A1C2E; }
+  .cat-count { font-size: 10px; color: #B0B5C8; margin-top: 1px; }
+  .cat-bar-bg { background: #F2F4FA; border-radius: 3px; height: 4px; width: 60px; margin-top: 2px; }
+  .cat-bar-fill { height: 4px; border-radius: 3px; background: #6C63FF; }
+  .cat-amount { font-size: 12px; font-weight: 800; color: #1A1C2E; min-width: 55px; text-align: right; }
+</style>
+</head>
+<body>
+
+<div style="text-align:center; padding:32px 20px 8px;">
+  <div style="font-size:28px; font-weight:900; color:#1A1C2E; letter-spacing:-1px;">AM I RICH</div>
+  <div style="font-size:13px; color:#8B90A7; margin-top:4px;">All cards visible · No scrolling · 3 screens</div>
+</div>
+
+<div class="phone-wrap">
+
+  <!-- SCREEN 1: Dashboard — all cards visible -->
+  <div>
+    <div class="phone-label">Main Dashboard</div>
+    <div class="phone">
+      <div class="status-bar"><span>9:41</span><span style="letter-spacing:2px;">●●●</span></div>
+      <div class="screen">
+
+        <div class="app-header">
+          <div>
+            <div class="greeting">Good morning,</div>
+            <div class="app-name">Am I Rich? 💰</div>
+          </div>
+          <div class="avatar">E</div>
+        </div>
+
+        <!-- Net worth dark banner -->
+        <div class="networth-banner">
+          <div class="networth-glow"></div>
+          <div class="networth-label">Total Net Worth</div>
+          <div class="networth-amount">RM 24,831.50</div>
+          <div class="networth-sub">Across 8 accounts · Updated just now</div>
+          <div class="networth-badge">▲ 2.4%</div>
+        </div>
+
+        <!-- Accounts & eWallets — 3 col grid, all visible -->
+        <div class="section-title">Accounts &amp; eWallets</div>
+        <div class="accounts-grid">
+          <div class="account-card c-mae">
+            <span class="card-icon">🏦</span>
+            <div class="card-bank">MAE</div>
+            <div class="card-type">Maybank</div>
+            <div class="card-balance">4,210.00</div>
+            <div class="card-currency">MYR</div>
+          </div>
+          <div class="account-card c-cimb">
+            <span class="card-icon">🏦</span>
+            <div class="card-bank">CIMB</div>
+            <div class="card-type">Savings</div>
+            <div class="card-balance">6,500.00</div>
+            <div class="card-currency">MYR</div>
+          </div>
+          <div class="account-card c-pb">
+            <span class="card-icon">🏦</span>
+            <div class="card-bank">Public</div>
+            <div class="card-type">Bank</div>
+            <div class="card-balance">2,100.00</div>
+            <div class="card-currency">MYR</div>
+          </div>
+          <div class="account-card c-tng">
+            <span class="card-icon">👛</span>
+            <div class="card-bank">TNG</div>
+            <div class="card-type">eWallet</div>
+            <div class="card-balance">312.50</div>
+            <div class="card-currency">MYR</div>
+          </div>
+          <div class="account-card c-grab">
+            <span class="card-icon">👛</span>
+            <div class="card-bank">GrabPay</div>
+            <div class="card-type">eWallet</div>
+            <div class="card-balance">88.00</div>
+            <div class="card-currency">MYR</div>
+          </div>
+          <div class="account-card c-boost">
+            <span class="card-icon">👛</span>
+            <div class="card-bank">Boost</div>
+            <div class="card-type">eWallet</div>
+            <div class="card-balance">45.00</div>
+            <div class="card-currency">MYR</div>
+          </div>
+        </div>
+
+        <!-- Savings & Investments — 2 col grid -->
+        <div class="section-title">Savings &amp; Investments</div>
+        <div class="savings-grid">
+          <div class="savings-card s-asnb">
+            <div class="sav-bank">ASNB</div>
+            <div class="sav-type">Unit Trust</div>
+            <div class="sav-balance">10,200.00</div>
+            <div class="sav-currency">MYR</div>
+          </div>
+          <div class="savings-card s-fd">
+            <div class="sav-bank">Fixed Deposit</div>
+            <div class="sav-type">Maybank · 12m</div>
+            <div class="sav-balance">1,376.00</div>
+            <div class="sav-currency">MYR</div>
+          </div>
+        </div>
+
+      </div><!-- /screen -->
+      <div class="bottom-nav">
+        <div class="nav-item active"><div class="nav-icon">⊟</div>Dashboard<div class="nav-dot"></div></div>
+        <div class="nav-item"><div class="nav-icon">↕</div>Spending</div>
+        <div class="nav-item"><div class="nav-icon">◷</div>Monthly</div>
+        <div class="nav-item"><div class="nav-icon">⊕</div>Add</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN 2: Spending -->
+  <div>
+    <div class="phone-label">Spending Page</div>
+    <div class="phone">
+      <div class="status-bar"><span>9:41</span><span style="letter-spacing:2px;">●●●</span></div>
+      <div class="screen">
+        <div class="page-header">
+          <div class="page-title">Spending</div>
+          <div class="page-sub">June 2026 · RM 764.40 spent</div>
+        </div>
+        <div class="cat-row">
+          <div class="cat-pill active">All</div>
+          <div class="cat-pill">Food</div>
+          <div class="cat-pill">Transport</div>
+          <div class="cat-pill">Shopping</div>
+          <div class="cat-pill">Bills</div>
+        </div>
+        <div class="spend-list">
+          <div class="spend-item">
+            <div class="spend-icon" style="background:#FFF3E0;">🧋</div>
+            <div class="spend-info">
+              <div class="spend-name">Tealive</div>
+              <div class="spend-meta">TNG · Today 3:12 PM · Food</div>
+            </div>
+            <div class="spend-amount">-RM 8.50</div>
+          </div>
+          <div class="spend-item">
+            <div class="spend-icon" style="background:#E8F5E9;">🚗</div>
+            <div class="spend-info">
+              <div class="spend-name">Grab</div>
+              <div class="spend-meta">GrabPay · Today 1:45 PM · Transport</div>
+            </div>
+            <div class="spend-amount">-RM 14.20</div>
+          </div>
+          <div class="spend-item">
+            <div class="spend-icon" style="background:#FFF9E0;">🛒</div>
+            <div class="spend-info">
+              <div class="spend-name">Aeon</div>
+              <div class="spend-meta">MAE · Yesterday · Shopping</div>
+            </div>
+            <div class="spend-amount">-RM 67.80</div>
+          </div>
+          <div class="spend-item">
+            <div class="spend-icon" style="background:#EDE7FF;">💸</div>
+            <div class="spend-info">
+              <div class="spend-name">Salary</div>
+              <div class="spend-meta">CIMB · Jun 1 · Income</div>
+            </div>
+            <div class="spend-amount income">+RM 3,500</div>
+          </div>
+          <div class="spend-item">
+            <div class="spend-icon" style="background:#FFECE9;">⚡</div>
+            <div class="spend-info">
+              <div class="spend-name">TNB Bill</div>
+              <div class="spend-meta">Boost · Jun 1 · Bills</div>
+            </div>
+            <div class="spend-amount">-RM 110.00</div>
+          </div>
+          <div class="spend-item">
+            <div class="spend-icon" style="background:#E3F2FD;">🍜</div>
+            <div class="spend-info">
+              <div class="spend-name">Secret Recipe</div>
+              <div class="spend-meta">Public Bank · May 31 · Food</div>
+            </div>
+            <div class="spend-amount">-RM 32.90</div>
+          </div>
+        </div>
+      </div>
+      <div class="bottom-nav">
+        <div class="nav-item"><div class="nav-icon">⊟</div>Dashboard</div>
+        <div class="nav-item active"><div class="nav-icon">↕</div>Spending<div class="nav-dot"></div></div>
+        <div class="nav-item"><div class="nav-icon">◷</div>Monthly</div>
+        <div class="nav-item"><div class="nav-icon">⊕</div>Add</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN 3: Monthly -->
+  <div>
+    <div class="phone-label">Monthly Page</div>
+    <div class="phone">
+      <div class="status-bar"><span>9:41</span><span style="letter-spacing:2px;">●●●</span></div>
+      <div class="screen">
+        <div class="page-header">
+          <div class="page-title">Monthly</div>
+          <div class="page-sub">Spending overview</div>
+        </div>
+
+        <div class="summary-row">
+          <div class="summary-card">
+            <div class="sum-label">Spent</div>
+            <div class="sum-value red">RM 764</div>
+          </div>
+          <div class="summary-card">
+            <div class="sum-label">Income</div>
+            <div class="sum-value green">RM 3,500</div>
+          </div>
+          <div class="summary-card">
+            <div class="sum-label">Saved</div>
+            <div class="sum-value">RM 2,736</div>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-label">Monthly spend</div>
+          <div class="bar-chart">
+            <div class="bar-wrap"><div class="bar" style="height:34px;"></div><div class="bar-label">Jan</div></div>
+            <div class="bar-wrap"><div class="bar" style="height:52px;"></div><div class="bar-label">Feb</div></div>
+            <div class="bar-wrap"><div class="bar" style="height:44px;"></div><div class="bar-label">Mar</div></div>
+            <div class="bar-wrap"><div class="bar" style="height:60px;"></div><div class="bar-label">Apr</div></div>
+            <div class="bar-wrap"><div class="bar" style="height:56px;"></div><div class="bar-label">May</div></div>
+            <div class="bar-wrap"><div class="bar current" style="height:38px;"></div><div class="bar-label active">Jun</div></div>
+          </div>
+        </div>
+
+        <div class="section-title">June by Category</div>
+        <div class="cat-list">
+          <div class="cat-item">
+            <div class="cat-icon" style="background:#FFF3E0;">🍔</div>
+            <div class="cat-info">
+              <div class="cat-name">Food &amp; Drinks</div>
+              <div class="cat-count">12 transactions</div>
+              <div class="cat-bar-bg"><div class="cat-bar-fill" style="width:75%;background:#FF9800;"></div></div>
+            </div>
+            <div class="cat-amount">RM 280</div>
+          </div>
+          <div class="cat-item">
+            <div class="cat-icon" style="background:#FFECE9;">⚡</div>
+            <div class="cat-info">
+              <div class="cat-name">Bills</div>
+              <div class="cat-count">3 transactions</div>
+              <div class="cat-bar-bg"><div class="cat-bar-fill" style="width:68%;background:#E8344A;"></div></div>
+            </div>
+            <div class="cat-amount">RM 210</div>
+          </div>
+          <div class="cat-item">
+            <div class="cat-icon" style="background:#EDE7FF;">🛍️</div>
+            <div class="cat-info">
+              <div class="cat-name">Shopping</div>
+              <div class="cat-count">5 transactions</div>
+              <div class="cat-bar-bg"><div class="cat-bar-fill" style="width:55%;"></div></div>
+            </div>
+            <div class="cat-amount">RM 178</div>
+          </div>
+          <div class="cat-item">
+            <div class="cat-icon" style="background:#E8F5E9;">🚌</div>
+            <div class="cat-info">
+              <div class="cat-name">Transport</div>
+              <div class="cat-count">8 transactions</div>
+              <div class="cat-bar-bg"><div class="cat-bar-fill" style="width:28%;background:#1A9E6A;"></div></div>
+            </div>
+            <div class="cat-amount">RM 95</div>
+          </div>
+        </div>
+      </div>
+      <div class="bottom-nav">
+        <div class="nav-item"><div class="nav-icon">⊟</div>Dashboard</div>
+        <div class="nav-item"><div class="nav-icon">↕</div>Spending</div>
+        <div class="nav-item active"><div class="nav-icon">◷</div>Monthly<div class="nav-dot"></div></div>
+        <div class="nav-item"><div class="nav-icon">⊕</div>Add</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div style="text-align:center; padding:20px; color:#8B90A7; font-size:11px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase;">
+  3×2 grid · All 8 accounts visible · No scroll · Light enterprise
+</div>
+
+</body>
+</html>

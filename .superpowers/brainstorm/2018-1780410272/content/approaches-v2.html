@@ -1,0 +1,57 @@
+<h2>Native App vs PWA</h2>
+<p class="subtitle">Adding PWA to the mix — it changes things quite a bit.</p>
+
+<div class="options">
+  <div class="option" data-choice="pwa" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>PWA (Progressive Web App) ⭐ Recommended for you</h3>
+      <p>A website that installs on your iPhone home screen and looks like an app. Built with React + Claude Vision API. No App Store, no $99/yr, no Mac needed.</p>
+      <div class="pros-cons" style="margin-top:10px;">
+        <div class="pros"><h4>Pros</h4><ul>
+          <li>No Apple Developer account ($99/yr saved)</li>
+          <li>Deploy free to Vercel or Netlify</li>
+          <li>Build entirely on Windows</li>
+          <li>Instant updates — just redeploy</li>
+          <li>Claude Vision reads any bank app screenshot</li>
+          <li>Simplest stack — just React + a web server</li>
+        </ul></div>
+        <div class="cons"><h4>Cons</h4><ul>
+          <li>⚠️ No iOS Share Extension — can't intercept the screenshot button directly</li>
+          <li>Flow becomes: take screenshot → open app → pick from Photos</li>
+          <li>Safari has stricter PWA limits than Android</li>
+          <li>Looks slightly less "native" than a real app</li>
+        </ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="rn" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>React Native + Expo (Real iOS App)</h3>
+      <p>A real iPhone app with full iOS integration. The share extension lets users share screenshots directly from the screenshot preview pop-up.</p>
+      <div class="pros-cons" style="margin-top:10px;">
+        <div class="pros"><h4>Pros</h4><ul>
+          <li>Share Extension works — screenshot → tap → done</li>
+          <li>Feels fully native on iPhone</li>
+          <li>Can publish to App Store eventually</li>
+        </ul></div>
+        <div class="cons"><h4>Cons</h4><ul>
+          <li>Requires Apple Developer account ($99/yr)</li>
+          <li>Expo EAS Build setup is more complex</li>
+          <li>Slower to iterate during development</li>
+        </ul></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="margin-top: 32px; padding: 20px; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px;">
+  <h3 style="margin-bottom: 8px;">The key trade-off</h3>
+  <p style="margin: 0; line-height: 1.6;">
+    PWA saves you <strong>$99/yr</strong> and a lot of complexity, but the screenshot sharing is one extra step —
+    you open the app and pick the screenshot from Photos instead of sharing it straight from the iOS preview pop-up.
+    For personal use, that's usually a fine trade-off. If you want the smoothest possible screenshot flow, go native.
+  </p>
+</div>
