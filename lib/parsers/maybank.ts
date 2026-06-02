@@ -1,2 +1,34 @@
-import type { ParseResult } from '@/lib/types'
-export function parseMaybank(_text: string): ParseResult | null { return null }
+import type { ParseResult, ParsedTransaction } from '@/lib/types'
+import { parseDate, parseAmount, firstRM } from './utils'
+
+export function parseMaybank(text: string): ParseResult | null {
+  if (!/MAE|Maybank/i.test(text)) return null
+
+  const balanceMatch = text.match(/(?:Available\s+Balance|Balance)\s*\n\s*RM\s*([\d,]+\.\d{2})/i)
+    ?? text.match(/MAE\s*\n[^\n]*\n\s*RM\s*([\d,]+\.\d{2})/i)
+  if (!balanceMatch) {
+    const fallback = firstRM(text)
+    if (!fallback) return null
+    return { institution: 'Maybank', accountName: 'MAE', balance: fallback, transactions: [] }
+  }
+
+  const balance = parseFloat(balanceMatch[1].replace(/,/g, ''))
+  const transactions = extractTransactions(text)
+  return { institution: 'Maybank', accountName: 'MAE', balance, transactions }
+}
+
+function extractTransactions(text: string): ParsedTransaction[] {
+  const results: ParsedTransaction[] = []
+  const lines = text.split('\n').map(l => l.trim()).filter(Boolean)
+  for (let i = 0; i < lines.length - 2; i++) {
+    const dateStr = parseDate(lines[i])
+    if (!dateStr) continue
+    const merchant = lines[i + 1]
+    const amount = parseAmount(lines[i + 2])
+    if (!merchant || amount === null) continue
+    if (/Available Balance|Balance/i.test(merchant)) continue
+    results.push({ amount, merchant, date: dateStr, type: amount < 0 ? 'debit' : 'credit' })
+    i += 2
+  }
+  return results
+}
