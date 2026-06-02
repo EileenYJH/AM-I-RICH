@@ -22,8 +22,8 @@ export function parseAmount(input: string): number | null {
   return (m[1] === '-' ? -1 : 1) * parseFloat(m[2].replace(/,/g, ''))
 }
 
-/** First RM amount found anywhere in text */
+/** First RM or MYR amount found anywhere in text */
 export function firstRM(text: string): number | null {
-  const m = text.match(/RM\s*([\d,]+\.\d{2})/)
+  const m = text.match(/(?:RM|MYR)\s*([\d,]+\.\d{2})/)
   return m ? parseFloat(m[1].replace(/,/g, '')) : null
 }

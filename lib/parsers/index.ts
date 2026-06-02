@@ -16,7 +16,7 @@ export function detectAndParse(text: string): DetectorResult {
     const result = parseMaybank(text)
     return result ? { type: 'account', result } : { type: 'parse_failed', institution: 'Maybank' }
   }
-  if (up.includes('CIMB')) {
+  if (up.includes('CIMB') || up.includes('MYWEALTH') || up.includes('YOUTH SA')) {
     const result = parseCIMB(text)
     return result ? { type: 'account', result } : { type: 'parse_failed', institution: 'CIMB' }
   }

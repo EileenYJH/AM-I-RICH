@@ -2,9 +2,10 @@ import type { ParseResult, ParsedTransaction } from '@/lib/types'
 import { parseDate, parseAmount, firstRM } from './utils'
 
 export function parseCIMB(text: string): ParseResult | null {
-  if (!/CIMB/i.test(text)) return null
+  if (!/CIMB|MyWealth|YOUTH SA/i.test(text)) return null
 
-  const balanceMatch = text.match(/(?:Current\s+Balance|Account\s+Balance|Balance)\s*\n\s*RM\s*([\d,]+\.\d{2})/i)
+  // Real CIMB app uses "MYR X,XXX.XX" format — match after Current Balance or Total Current Balance
+  const balanceMatch = text.match(/(?:Total\s+Current\s+Balance|Current\s+Balance|Account\s+Balance)\s*\n?\s*(?:MYR|RM)\s*([\d,]+\.\d{2})/i)
   if (!balanceMatch) {
     const fallback = firstRM(text)
     if (!fallback) return null
