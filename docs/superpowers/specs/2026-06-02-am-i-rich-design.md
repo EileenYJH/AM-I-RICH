@@ -51,7 +51,9 @@ No App Store required. No $99/yr Apple Developer account. No AI API costs. Deplo
 | Account | Institution | Brand Color |
 |---|---|---|
 | Unit Trust | ASNB | `#006B3E` |
-| Fixed Deposit | Maybank (or others) | `#2D3561` |
+| Fixed Deposit | Any bank (multiple placements) | `#2D3561` |
+
+Each FD placement is tracked individually. One screenshot per new placement creates a new FD record. Multiple active FD placements are supported.
 
 ---
 
@@ -98,7 +100,7 @@ Each institution has a unique set of keyword signatures that appear reliably in 
 | GrabPay | `"GrabPay"`, `"Grab"`, `"Wallet Balance"` |
 | Boost | `"Boost"`, `"My Balance"` |
 | ASNB | `"ASNB"`, `"Amanah Saham"`, `"Unit Held"` |
-| Fixed Deposit | `"Fixed Deposit"`, `"FD"`, `"Maturity Date"` |
+| Fixed Deposit | `"Fixed Deposit"`, `"FD"`, `"Maturity Date"`, `"Placement Date"`, `"p.a."` |
 
 If no institution is detected, the ingest is logged as `status: "unrecognised"` and skipped.
 
@@ -109,6 +111,16 @@ Each institution gets its own parser function (`parsers/maybank.ts`, `parsers/tn
 - **Transaction category:** keyword matching on merchant name (e.g. "Grab" → transport, "Aeon" → shopping, "TNB" → bills)
 
 Parsers return a typed result: `{ institution, balance, transactions[], parsed_at }`. If the balance regex fails to match, the result is flagged `status: "parse_failed"` and skipped.
+
+**Fixed Deposit parser** extracts additional fields beyond balance:
+- `principal` — original amount placed (e.g. `RM 1,000.00`)
+- `interest_rate` — interest rate per annum (e.g. `3.50% p.a.`)
+- `placement_date` — date the FD was opened
+- `maturity_date` — date the FD matures
+- `interest_amount` — total interest to be earned (parsed or calculated: `principal × rate × days/365`)
+- `total_at_maturity` — principal + interest_amount
+
+Each FD screenshot creates a **new `fixed_deposits` row** rather than updating an existing account balance. The FD section on the dashboard sums all active placements.
 
 **Parser maintenance:** If a bank updates its app layout, only the regex for that parser needs updating — other accounts are unaffected.
 
@@ -138,6 +150,22 @@ Parsers return a typed result: `{ institution, balance, transactions[], parsed_a
 | date | date | Transaction date |
 | source | enum | `screenshot`, `manual` |
 
+### `fixed_deposits`
+| Column | Type | Notes |
+|---|---|---|
+| id | uuid PK | |
+| institution | text | e.g. "Maybank", "CIMB" |
+| principal | numeric | Original amount placed (MYR) |
+| interest_rate | numeric | % per annum e.g. `3.50` |
+| placement_date | date | Date FD was opened |
+| maturity_date | date | Date FD matures |
+| interest_amount | numeric | Total interest earned at maturity |
+| total_at_maturity | numeric | principal + interest_amount |
+| status | enum | `active`, `matured` — auto-set to `matured` when maturity_date passes |
+| created_at | timestamptz | When this record was created (screenshot processed) |
+
+Each new FD placement screenshot inserts a new row. Matured FDs are kept for history but excluded from the net worth total.
+
 ### `ingest_log`
 | Column | Type | Notes |
 |---|---|---|
@@ -158,6 +186,8 @@ Parsers return a typed result: `{ institution, balance, transactions[], parsed_a
 - Dark net worth banner: total MYR across all accounts + % change vs previous month
 - **Accounts & eWallets section** — 3×2 grid, all 6 cards visible (no horizontal scroll), brand colors
 - **Savings & Investments section** — 2-column grid, white cards with coloured top strip (ASNB green, FD navy)
+  - ASNB card: balance + last updated date
+  - FD card(s): each active placement shows principal, interest rate (% p.a.), maturity date, and total benefit at maturity. Multiple active placements appear as separate cards. A "Matures in X days" label highlights upcoming maturity dates.
 - No scrolling required — all accounts fit one screen
 
 ### Spending
