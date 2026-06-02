@@ -24,7 +24,9 @@ export function detectAndParse(text: string): DetectorResult {
     const result = parsePublicBank(text)
     return result ? { type: 'account', result } : { type: 'parse_failed', institution: 'Public Bank' }
   }
-  if (up.includes("TOUCH 'N GO") || up.includes('TNG') || up.includes('EWALLET BALANCE')) {
+  if (up.includes("TOUCH 'N GO") || up.includes('TNG') || up.includes('EWALLET BALANCE') ||
+      up.includes('GOREWARDS') || up.includes('GOFINANCE') || up.includes('FUEL BALANCE') ||
+      (up.includes('ADD MONEY') && up.includes('TRANSACTIONS'))) {
     const result = parseTNG(text)
     return result ? { type: 'account', result } : { type: 'parse_failed', institution: 'Touch n Go' }
   }

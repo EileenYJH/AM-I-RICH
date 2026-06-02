@@ -2,16 +2,12 @@ import type { ParseResult, ParsedTransaction } from '@/lib/types'
 import { parseDate, parseAmount, firstRM } from './utils'
 
 export function parseTNG(text: string): ParseResult | null {
-  if (!/Touch|TNG|eWallet Balance/i.test(text)) return null
+  if (!/Touch|TNG|eWallet Balance|GOrewards|GOfinance|Fuel balance/i.test(text)) return null
 
-  const balanceMatch = text.match(/(?:eWallet\s+Balance|Balance)\s*\n\s*RM\s*([\d,]+\.\d{2})/i)
-  if (!balanceMatch) {
-    const fallback = firstRM(text)
-    if (!fallback) return null
-    return { institution: 'Touch n Go', accountName: 'eWallet', balance: fallback, transactions: [] }
-  }
+  // Real TNG app shows balance as a standalone "RM X" line — just grab the first one
+  const balance = firstRM(text)
+  if (!balance) return null
 
-  const balance = parseFloat(balanceMatch[1].replace(/,/g, ''))
   return { institution: 'Touch n Go', accountName: 'eWallet', balance, transactions: extractTransactions(text) }
 }
 
