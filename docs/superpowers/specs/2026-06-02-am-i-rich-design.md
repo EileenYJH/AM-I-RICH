@@ -13,11 +13,11 @@ Money is scattered across multiple Malaysian bank accounts, e-wallets, and savin
 ## Solution Overview
 
 A PWA (Progressive Web App) installable on iPhone that:
-1. Receives screenshots via Apple Shortcuts automation (triggered automatically on screenshot)
-2. Parses them with Claude Vision API to extract balances and transactions
+1. Uses Apple Shortcuts automation to extract text from screenshots on-device (free, no API)
+2. POSTs the extracted text to the backend, which runs institution-specific parsers to pull out balances and transactions
 3. Displays a unified dashboard showing all accounts, spending history, and monthly summaries
 
-No App Store required. No $99/yr Apple Developer account. Deployed free to Vercel.
+No App Store required. No $99/yr Apple Developer account. No AI API costs. Deployed free to Vercel.
 
 ---
 
@@ -28,7 +28,8 @@ No App Store required. No $99/yr Apple Developer account. Deployed free to Verce
 | Frontend | Next.js (React) — PWA |
 | Backend | Next.js API routes |
 | Database | Supabase (PostgreSQL, free tier) |
-| AI parsing | Claude Vision API (claude-haiku-4-5) |
+| OCR | Apple Vision framework (via Shortcuts, on-device, free) |
+| Text parsing | Custom regex parsers per institution (backend) |
 | Automation | Apple Shortcuts (iOS Personal Automation) |
 | Hosting | Vercel (free tier) |
 
@@ -61,43 +62,55 @@ User takes screenshot in banking/ewallet app
         ↓
 iOS Personal Automation triggers (Screenshot trigger, iOS 16+)
         ↓
-Shortcut: Get Latest Photo → base64 encode → POST /api/ingest
+Shortcut: Get Latest Photo → "Extract Text from Image" (Apple on-device OCR, free)
+        ↓
+Shortcut: POST { text: "<extracted text>" } to /api/ingest
   (Bearer token in Shortcut for auth)
         ↓
-API route receives image → sends to Claude Vision API
-  with structured extraction prompt
+Backend: auto-detect institution from keyword signatures in text
         ↓
-Claude returns JSON: { account, institution, balance, transactions[] }
+Backend: run institution-specific parser → extract balance + transactions
         ↓
 API: upsert accounts.balance, insert new transactions
         ↓
 User opens PWA → balances already updated
 ```
 
-**One-time Shortcuts setup:** iOS Shortcuts → Automations → New Automation → "Screenshot" → Get Latest Photo from Album → Get Contents of URL (POST to `https://your-app.vercel.app/api/ingest`, Authorization header with Bearer token).
+**One-time Shortcuts setup:** iOS Shortcuts → Automations → New Automation → "Screenshot" → Get Latest Photo from Album → Extract Text from Image → Get Contents of URL (POST to `https://your-app.vercel.app/api/ingest`, body: `{ "text": [extracted text] }`, Authorization header with Bearer token).
 
-**ASNB & Fixed Deposit:** These accounts do not have transaction histories accessible via screenshot — only a current balance. The Claude Vision extraction for these returns `transactions: []` and only updates `accounts.balance`. Screenshots of the ASNB app portfolio page and bank FD summary page are supported.
+**ASNB & Fixed Deposit:** These accounts do not have transaction histories accessible via screenshot — only a current balance. Their parsers return `transactions: []` and only update `accounts.balance`. Screenshots of the ASNB app portfolio page and bank FD summary page are supported.
 
 ---
 
-## Claude Vision Prompt Strategy
+## Text Parsing Strategy
 
-The `/api/ingest` endpoint sends the screenshot to Claude Vision with a prompt that:
-- Specifies known Malaysian bank/ewallet app UI patterns
-- Requests a strict JSON response:
-  ```json
-  {
-    "institution": "Maybank",
-    "account_type": "MAE",
-    "balance": 4210.00,
-    "currency": "MYR",
-    "transactions": [
-      { "amount": -8.50, "merchant": "Tealive", "date": "2026-06-02", "type": "debit" }
-    ],
-    "confidence": "high"
-  }
-  ```
-- If `confidence` is `"low"`, the API flags the entry for manual review instead of auto-saving.
+The `/api/ingest` endpoint receives raw OCR text and processes it in two steps:
+
+### Step 1 — Institution detection
+Each institution has a unique set of keyword signatures that appear reliably in its OCR output:
+
+| Institution | Detection keywords |
+|---|---|
+| MAE / Maybank | `"MAE"`, `"Maybank"`, `"Available Balance"` |
+| CIMB | `"CIMB"`, `"CIMB Clicks"`, `"Current Balance"` |
+| Public Bank | `"Public Bank"`, `"PBe"`, `"Available Balance"` |
+| TNG eWallet | `"Touch 'n Go"`, `"TNG"`, `"eWallet Balance"` |
+| GrabPay | `"GrabPay"`, `"Grab"`, `"Wallet Balance"` |
+| Boost | `"Boost"`, `"My Balance"` |
+| ASNB | `"ASNB"`, `"Amanah Saham"`, `"Unit Held"` |
+| Fixed Deposit | `"Fixed Deposit"`, `"FD"`, `"Maturity Date"` |
+
+If no institution is detected, the ingest is logged as `status: "unrecognised"` and skipped.
+
+### Step 2 — Per-institution parser
+Each institution gets its own parser function (`parsers/maybank.ts`, `parsers/tng.ts`, etc.) that uses regex to extract:
+- **Balance:** the primary numeric balance value (e.g. match `RM\s*([\d,]+\.\d{2})` near known label)
+- **Transactions:** repeated patterns of date + merchant + amount (best-effort; not all app screens show transaction history)
+- **Transaction category:** keyword matching on merchant name (e.g. "Grab" → transport, "Aeon" → shopping, "TNB" → bills)
+
+Parsers return a typed result: `{ institution, balance, transactions[], parsed_at }`. If the balance regex fails to match, the result is flagged `status: "parse_failed"` and skipped.
+
+**Parser maintenance:** If a bank updates its app layout, only the regex for that parser needs updating — other accounts are unaffected.
 
 ---
 
@@ -121,7 +134,7 @@ The `/api/ingest` endpoint sends the screenshot to Claude Vision with a prompt t
 | account_id | uuid FK → accounts | |
 | amount | numeric | Negative = debit, positive = credit |
 | merchant | text | Parsed merchant name |
-| category | text | Categorised by Claude Vision during parsing: food, transport, shopping, bills, income |
+| category | text | Keyword-matched from merchant name in parser: food, transport, shopping, bills, income |
 | date | date | Transaction date |
 | source | enum | `screenshot`, `manual` |
 
@@ -130,9 +143,9 @@ The `/api/ingest` endpoint sends the screenshot to Claude Vision with a prompt t
 |---|---|---|
 | id | uuid PK | |
 | received_at | timestamptz | |
-| status | enum | `success`, `low_confidence`, `failed` |
+| status | enum | `success`, `parse_failed`, `unrecognised` |
 | account_id | uuid FK | Nullable — null if institution unrecognised |
-| raw_response | jsonb | Full Claude response for debugging |
+| raw_text | text | Raw OCR text received from Shortcut (for debugging parsers) |
 
 ---
 
