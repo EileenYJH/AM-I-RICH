@@ -7,5 +7,4 @@ export default withPWA({
   skipWaiting: true,
 })({
   reactStrictMode: true,
-  turbopack: {},
 })
