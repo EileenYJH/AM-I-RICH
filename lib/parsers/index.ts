@@ -7,6 +7,8 @@ import { parseGrabPay } from './grabpay'
 import { parseBoost } from './boost'
 import { parseASNB } from './asnb'
 import { parseFixedDeposit } from './fixed-deposit'
+import { parseAlliance } from './alliance'
+import { parseHLB } from './hlb'
 
 export function detectAndParse(text: string): DetectorResult {
   if (!text.trim()) return { type: 'unrecognised' }
@@ -37,6 +39,14 @@ export function detectAndParse(text: string): DetectorResult {
   if (up.includes('BOOST')) {
     const result = parseBoost(text)
     return result ? { type: 'account', result } : { type: 'parse_failed', institution: 'Boost' }
+  }
+  if (up.includes('ALLIANCE')) {
+    const result = parseAlliance(text)
+    return result ? { type: 'account', result } : { type: 'parse_failed', institution: 'Alliance Bank' }
+  }
+  if (up.includes('HONG LEONG') || up.includes('HLB')) {
+    const result = parseHLB(text)
+    return result ? { type: 'account', result } : { type: 'parse_failed', institution: 'Hong Leong Bank' }
   }
   if (up.includes('ASNB') || up.includes('AMANAH SAHAM')) {
     const result = parseASNB(text)
