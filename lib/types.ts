@@ -55,6 +55,7 @@ export interface FDParseResult {
   maturityDate: string
   interestAmount: number
   totalAtMaturity: number
+  reference: string  // unique key — account ref number or deterministic hash
 }
 
 export type DetectorResult =

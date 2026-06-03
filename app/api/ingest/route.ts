@@ -48,9 +48,14 @@ export async function POST(req: NextRequest) {
       maturity_date: fd.maturityDate,
       interest_amount: fd.interestAmount,
       total_at_maturity: fd.totalAtMaturity,
+      reference: fd.reference,
       status: 'active',
     }))
-    await db.from('fixed_deposits').insert(rows)
+    // Upsert on reference — re-scanning same screenshot won't create duplicates
+    await db.from('fixed_deposits').upsert(rows, {
+      onConflict: 'reference',
+      ignoreDuplicates: false, // update if rate/amount changed
+    })
     await log('success')
     return NextResponse.json({ status: 'success', type: 'fd', count: rows.length, institution: rows[0]?.institution })
   }

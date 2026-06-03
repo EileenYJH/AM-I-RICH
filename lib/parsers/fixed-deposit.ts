@@ -38,7 +38,9 @@ function parseSingle(text: string, institution: string): FDParseResult | null {
     ?? extractLabeledDate(text, 'End Date')
   if (!placementDate || !maturityDate) return null
 
-  return buildFD(institution, principal, interestRate, placementDate, maturityDate, text)
+  // Deterministic reference so re-scanning same FD doesn't duplicate
+  const reference = `${institution}-${placementDate}-${principal}-${interestRate}`
+  return buildFD(institution, principal, interestRate, placementDate, maturityDate, text, reference)
 }
 
 function parseMultiple(text: string, institution: string): FDParseResult[] | null {
@@ -58,6 +60,8 @@ function parseMultiple(text: string, institution: string): FDParseResult[] | nul
     const start = sectionStarts[s]
     const end = sectionStarts[s + 1] ?? lines.length
     const block = lines.slice(start, end).join('\n')
+    // The first line of the section is the account reference number
+    const reference = lines[start].replace(/\s+/g, '-')
 
     const rateMatch = block.match(/([\d.]+)\s*%\s*p\.a\.?/i)
     if (!rateMatch) continue
@@ -73,7 +77,7 @@ function parseMultiple(text: string, institution: string): FDParseResult[] | nul
       ?? extractLabeledDate(block, 'To')
     if (!placementDate || !maturityDate) continue
 
-    results.push(buildFD(institution, principal, interestRate, placementDate, maturityDate, block))
+    results.push(buildFD(institution, principal, interestRate, placementDate, maturityDate, block, reference))
   }
 
   return results.length > 0 ? results : null
@@ -86,6 +90,7 @@ function buildFD(
   placementDate: string,
   maturityDate: string,
   text: string,
+  reference: string,
 ): FDParseResult {
   const days = daysBetween(placementDate, maturityDate)
   const parsedInterest = extractLabeledMYR(text, 'Interest Amount')
@@ -93,7 +98,7 @@ function buildFD(
   const interestAmount = parsedInterest
     ?? parseFloat((principal * (interestRate / 100) * (days / 365)).toFixed(2))
   const totalAtMaturity = parseFloat((principal + interestAmount).toFixed(2))
-  return { institution, principal, interestRate, placementDate, maturityDate, interestAmount, totalAtMaturity }
+  return { institution, principal, interestRate, placementDate, maturityDate, interestAmount, totalAtMaturity, reference }
 }
 
 /** Extracts amount after a label, supports RM and MYR, inline and next-line */
