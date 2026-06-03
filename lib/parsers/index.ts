@@ -54,7 +54,7 @@ export function detectAndParse(text: string): DetectorResult {
     const result = parseMBSB(text)
     return result ? { type: 'account', result } : { type: 'parse_failed', institution: 'MBSB Bank' }
   }
-  if (up.includes('KTMB') || up.includes('KTM BERHAD')) {
+  if (up.includes('KTMB') || up.includes('KTM BERHAD') || up.includes('KTM WALLET')) {
     const result = parseKTMB(text)
     return result ? { type: 'account', result } : { type: 'parse_failed', institution: 'KTMB' }
   }
