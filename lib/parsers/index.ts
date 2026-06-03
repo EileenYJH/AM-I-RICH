@@ -9,6 +9,8 @@ import { parseASNB } from './asnb'
 import { parseFixedDeposit } from './fixed-deposit'
 import { parseAlliance } from './alliance'
 import { parseHLB } from './hlb'
+import { parseMBSB } from './mbsb'
+import { parseKTMB } from './ktmb'
 
 export function detectAndParse(text: string): DetectorResult {
   if (!text.trim()) return { type: 'unrecognised' }
@@ -47,6 +49,14 @@ export function detectAndParse(text: string): DetectorResult {
   if (up.includes('HONG LEONG') || up.includes('HLB')) {
     const result = parseHLB(text)
     return result ? { type: 'account', result } : { type: 'parse_failed', institution: 'Hong Leong Bank' }
+  }
+  if (up.includes('MBSB')) {
+    const result = parseMBSB(text)
+    return result ? { type: 'account', result } : { type: 'parse_failed', institution: 'MBSB Bank' }
+  }
+  if (up.includes('KTMB') || up.includes('KTM BERHAD')) {
+    const result = parseKTMB(text)
+    return result ? { type: 'account', result } : { type: 'parse_failed', institution: 'KTMB' }
   }
   if (up.includes('ASNB') || up.includes('AMANAH SAHAM')) {
     const result = parseASNB(text)

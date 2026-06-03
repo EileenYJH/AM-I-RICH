@@ -10,7 +10,7 @@ export default async function Dashboard() {
   const db = createServerClient()
 
   const [{ data: accounts }, { data: fds }] = await Promise.all([
-    db.from('accounts').select('*').order('type').order('institution'),
+    db.from('accounts').select('*').eq('hidden', false).order('type').order('institution'),
     db.from('fixed_deposits').select('*').eq('status', 'active').order('maturity_date'),
   ])
 
