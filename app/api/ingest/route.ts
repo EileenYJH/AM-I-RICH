@@ -40,8 +40,7 @@ export async function POST(req: NextRequest) {
   }
 
   if (parsed.type === 'fd') {
-    const fd = parsed.result
-    await db.from('fixed_deposits').insert({
+    const rows = parsed.results.map(fd => ({
       institution: fd.institution,
       principal: fd.principal,
       interest_rate: fd.interestRate,
@@ -50,9 +49,10 @@ export async function POST(req: NextRequest) {
       interest_amount: fd.interestAmount,
       total_at_maturity: fd.totalAtMaturity,
       status: 'active',
-    })
+    }))
+    await db.from('fixed_deposits').insert(rows)
     await log('success')
-    return NextResponse.json({ status: 'success', type: 'fd', institution: fd.institution })
+    return NextResponse.json({ status: 'success', type: 'fd', count: rows.length, institution: rows[0]?.institution })
   }
 
   // type === 'account'

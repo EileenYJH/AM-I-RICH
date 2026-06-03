@@ -59,6 +59,6 @@ export interface FDParseResult {
 
 export type DetectorResult =
   | { type: 'account'; result: ParseResult }
-  | { type: 'fd'; result: FDParseResult }
+  | { type: 'fd'; results: FDParseResult[] }
   | { type: 'unrecognised' }
   | { type: 'parse_failed'; institution: string }

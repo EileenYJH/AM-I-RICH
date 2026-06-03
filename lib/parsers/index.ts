@@ -52,9 +52,10 @@ export function detectAndParse(text: string): DetectorResult {
     const result = parseASNB(text)
     return result ? { type: 'account', result } : { type: 'parse_failed', institution: 'ASNB' }
   }
-  if (up.includes('FIXED DEPOSIT') || up.includes('MATURITY DATE') || (up.includes('P.A.') && up.includes('FD'))) {
-    const result = parseFixedDeposit(text)
-    return result ? { type: 'fd', result } : { type: 'parse_failed', institution: 'Fixed Deposit' }
+  if (up.includes('FIXED DEPOSIT') || up.includes('E-FIXED DEPOSIT') || up.includes('MATURITY DATE') ||
+      (up.includes('P.A') && (up.includes('PLACEMENT DATE') || up.includes('MATURITY')))) {
+    const results = parseFixedDeposit(text)
+    return results ? { type: 'fd', results } : { type: 'parse_failed', institution: 'Fixed Deposit' }
   }
 
   return { type: 'unrecognised' }
