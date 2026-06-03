@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import type { Account } from '@/lib/types'
 import { hideAccount } from '@/app/actions'
+import { useLongPress } from '@/hooks/useLongPress'
 
 function darken(hex: string): string {
   const n = parseInt(hex.slice(1), 16)
@@ -15,6 +16,7 @@ function darken(hex: string): string {
 export default function AccountCard({ account }: { account: Account }) {
   const router = useRouter()
   const [gone, setGone] = useState(false)
+  const { active: deleteMode, start, cancel, dismiss } = useLongPress()
 
   async function handleDelete() {
     if (!confirm(`Remove ${account.name} (${account.institution})?`)) return
@@ -27,15 +29,27 @@ export default function AccountCard({ account }: { account: Account }) {
 
   return (
     <div
-      className="rounded-[14px] p-3 relative overflow-hidden shadow-md"
-      style={{ background: `linear-gradient(140deg, ${account.color}, ${darken(account.color)})` }}
+      className="rounded-[14px] p-3 relative overflow-hidden shadow-md select-none"
+      style={{
+        background: `linear-gradient(140deg, ${account.color}, ${darken(account.color)})`,
+        outline: deleteMode ? '2px solid rgba(255,255,255,0.5)' : 'none',
+      }}
+      onTouchStart={start}
+      onTouchEnd={cancel}
+      onTouchMove={cancel}
+      onMouseDown={start}
+      onMouseUp={cancel}
+      onMouseLeave={cancel}
+      onClick={deleteMode ? dismiss : undefined}
     >
       <div className="absolute inset-0 bg-gradient-to-br from-white/15 to-transparent pointer-events-none" />
-      <button
-        onClick={handleDelete}
-        className="absolute top-2 right-2 w-5 h-5 rounded-full bg-black/25 flex items-center justify-center text-white/70 text-[10px] hover:bg-black/50 transition-colors z-10"
-        aria-label="Remove account"
-      >✕</button>
+      {deleteMode && (
+        <button
+          onClick={e => { e.stopPropagation(); handleDelete() }}
+          className="absolute top-2 right-2 w-5 h-5 rounded-full bg-black/40 flex items-center justify-center text-white text-[10px] z-10 animate-pulse"
+          aria-label="Remove account"
+        >✕</button>
+      )}
       <p className="text-[10px] font-bold tracking-wider uppercase text-white/85 pr-6">{account.name}</p>
       <p className="text-[9px] text-white/50 mt-0.5">{account.institution}</p>
       <p className="text-[17px] font-extrabold text-white mt-3 tracking-tight leading-none">
